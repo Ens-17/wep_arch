@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>----</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="results.js"></script>
+<script src="script.js" defer></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ブキ名検索 -->
+    <section class="card">
+
+        <h2>ブキ名検索</h2>
+
+        <input
+            type="text"
+            id="weaponName"
+            placeholder="ブキ名を入力">
+
+        <div class="radioGroup">
+
+            <label>
+                <input
+                    type="radio"
+                    name="searchMode"
+                    value="all"
+                    checked>
+                全体部分一致
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="searchMode"
+                    value="continuous">
+                連続部分一致
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="searchMode"
+                    value="exact">
+                完全一致
+            </label>
+
+        </div>
+
+    </section>
+
+    <!-- ブキ種 -->
+    <section class="card">
+
+        <div class="sectionHeader">
+
+            <h2>ブキ種</h2>
+
+            <label class="excludeLabel">
+                <input
+                    type="checkbox"
+                    id="excludeType">
+                除外
+            </label>
+
+        </div>
+
+        <div
+            class="customSelect"
+            data-name="ブキ種">
+
+            <button
+                type="button"
+                id="typeButton"
+                class="selectButton"
+                data-target="typeDropdown">
+
+                ▼ ブキ種（すべて）
+
+            </button>
+
+            <div
+                id="typeDropdown"
+                class="dropdown"
+                >
+
+                <div class="dropdownActions">
+
+                    <button
+                        type="button"
+                        class="selectAll">
+
+                        すべて
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clearAll">
+
+                        解除
+
+                    </button>
+
+                </div>
+
+                <div
+                    id="typeList"
+                    class="checkGrid">
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- サブ -->
+    <section class="card">
+
+        <div class="sectionHeader">
+
+            <h2>サブ</h2>
+
+            <label class="excludeLabel">
+                <input
+                    type="checkbox"
+                    id="excludeSub">
+                除外
+            </label>
+
+        </div>
+
+        <div
+            class="customSelect"
+            data-name="サブ">
+
+            <button
+                type="button"
+                id="subButton"
+                class="selectButton"
+                data-target="subDropdown">
+
+                ▼ サブ（すべて）
+
+            </button>
+
+            <div
+                id="subDropdown"
+                class="dropdown"
+                >
+
+                <div class="dropdownActions">
+
+                    <button
+                        type="button"
+                        class="selectAll">
+
+                        すべて
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clearAll">
+
+                        解除
+
+                    </button>
+
+                </div>
+
+                <div
+                    id="subList"
+                    class="checkGrid">
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- スペシャル -->
+    <section class="card">
+
+        <div class="sectionHeader">
+
+            <h2>スペシャル</h2>
+
+            <label class="excludeLabel">
+                <input
+                    type="checkbox"
+                    id="excludeSp">
+                除外
+            </label>
+
+        </div>
+
+        <div
+            class="customSelect"
+            data-name="スペシャル">
+
+            <button
+                type="button"
+                id="spButton"
+                class="selectButton"
+                data-target="spDropdown">
+
+                ▼ スペシャル（すべて）
+
+            </button>
+
+            <div
+                id="spDropdown"
+                class="dropdown"
+                >
+
+                <div class="dropdownActions">
+
+                    <button
+                        type="button"
+                        class="selectAll">
+
+                        すべて
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clearAll">
+
+                        解除
+
+                    </button>
+
+                </div>
+
+                <div
+                    id="spList"
+                    class="checkGrid">
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ボタン -->
+    <section class="buttonArea">
+
+        <button id="searchButton">
+            検索
+        </button>
+
+        <button id="resetButton">
+            リセット
+        </button>
+
+    </section>
+
+    <!-- 件数 -->
+    <section
+        id="resultInfo"
+        class="resultInfo">
+
+        検索結果：0件
+
+    </section>
+
+    <!-- 検索結果 -->
+    <section
+        id="resultList"
+        class="resultList">
+    </section>
+
+</div>
+
+</body>
+</html>
