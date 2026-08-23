@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>経験値計算機</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 24px 16px;
+    background: #f5f6f8;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    color: #222;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+h1 {
+    margin: 0 0 24px;
+    text-align: center;
+    font-size: 26px;
+}
+
+.input-box {
+    background: #fff;
+    padding: 18px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #d5d8dd;
+    border-radius: 9px;
+    font-size: 18px;
+    outline: none;
+    background: #fafafa;
+}
+
+input:focus {
+    border-color: #555;
+    background: #fff;
+}
+
+.description {
+    margin-top: 7px;
+    font-size: 12px;
+    color: #888;
+}
+
+.result {
+    margin-top: 22px;
+    padding: 22px 18px;
+    background: #222;
+    color: #fff;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 14px;
+    opacity: 0.75;
+    margin-bottom: 8px;
+}
+
+.result-time {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.remaining {
+    margin-top: 14px;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.error {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 10px;
+    background: #ffe8e8;
+    color: #c62828;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+}
+
+.reset-button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #ddd;
+    color: #333;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.reset-button:active {
+    background: #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>経験値計算機</h1>
+
+    <div class="input-box">
+        <label for="required">
+            必要経験値
+        </label>
+
+        <input
+            id="required"
+            type="text"
+            inputmode="decimal"
+            placeholder=" "
+        >
+
+        <div class="description">
+        </div>
+    </div>
+
+
+    <div class="input-box">
+        <label for="current">
+            現在の経験値
+        </label>
+
+        <input
+            id="current"
+            type="text"
+            inputmode="decimal"
+            placeholder=" "
+        >
+
+        <div class="description">
+        </div>
+    </div>
+
+
+    <div class="input-box">
+        <label for="perHour">
+            1時間での産出量
+        </label>
+
+        <input
+            id="perHour"
+            type="text"
+            inputmode="decimal"
+            placeholder=" "
+        >
+
+        <div class="description">
+        </div>
+    </div>
+
+
+    <div id="error" class="error"></div>
+
+
+    <div class="result">
+
+        <div class="result-title">
+            必要時間
+        </div>
+
+        <div id="resultTime" class="result-time">
+            -
+        </div>
+
+        <div id="remaining" class="remaining">
+            残り経験値：-
+        </div>
+
+    </div>
+
+
+    <button id="resetButton" class="reset-button">
+        リセット
+    </button>
+
+</div>
+
+
+<script>
+
+const requiredInput = document.getElementById("required");
+const currentInput = document.getElementById("current");
+const perHourInput = document.getElementById("perHour");
+
+const resultTime = document.getElementById("resultTime");
+const remaining = document.getElementById("remaining");
+const errorBox = document.getElementById("error");
+
+const resetButton = document.getElementById("resetButton");
+
+
+// ==============================
+// 数値を解析
+// ==============================
+
+function parseValue(value) {
+
+    value = value.trim();
+
+    if (value === "") {
+        return null;
+    }
+
+    // 数字 + K/M/B
+    const match = value.match(
+        /^([0-9]*\.?[0-9]+)\s*([KMB])?$/i
+    );
+
+    if (!match) {
+        return null;
+    }
+
+    const number = parseFloat(match[1]);
+
+    const unit = match[2]
+        ? match[2].toUpperCase()
+        : "";
+
+    const multipliers = {
+        "": 1,
+        "K": 1000,
+        "M": 1000000,
+        "B": 1000000000
+    };
+
+    return number * multipliers[unit];
+}
+
+
+// ==============================
+// 数値をK/M/B形式に変換
+// ==============================
+
+function formatValue(value) {
+
+    if (value >= 1000000000) {
+        return (value / 1000000000)
+            .toFixed(2)
+            .replace(/\.?0+$/, "") + "B";
+    }
+
+    if (value >= 1000000) {
+        return (value / 1000000)
+            .toFixed(2)
+            .replace(/\.?0+$/, "") + "M";
+    }
+
+    if (value >= 1000) {
+        return (value / 1000)
+            .toFixed(2)
+            .replace(/\.?0+$/, "") + "K";
+    }
+
+    return Math.round(value).toLocaleString() + "";
+}
+
+
+// ==============================
+// 時間を「○時間○分○秒」に変換
+// ==============================
+
+function formatTime(hours) {
+
+    const totalSeconds = Math.ceil(hours * 3600);
+
+    const h = Math.floor(totalSeconds / 3600);
+
+    const m = Math.floor(
+        (totalSeconds % 3600) / 60
+    );
+
+    const s = totalSeconds % 60;
+
+    const parts = [];
+
+    if (h > 0) {
+        parts.push(h + "時間");
+    }
+
+    if (m > 0) {
+        parts.push(m + "分");
+    }
+
+    if (s > 0) {
+        parts.push(s + "秒");
+    }
+
+    if (parts.length === 0) {
+        return "0秒";
+    }
+
+    return parts.join("");
+}
+
+
+// ==============================
+// 計算
+// ==============================
+
+function calculate() {
+
+    errorBox.style.display = "none";
+
+    const required = parseValue(
+        requiredInput.value
+    );
+
+    const current = parseValue(
+        currentInput.value
+    );
+
+    const perHour = parseValue(
+        perHourInput.value
+    );
+
+
+    // 未入力
+    if (
+        required === null ||
+        current === null ||
+        perHour === null
+    ) {
+
+        resultTime.textContent = "-";
+        remaining.textContent = "残り経験値：-";
+
+        return;
+    }
+
+
+    // 不正な値
+    if (
+        required < 0 ||
+        current < 0 ||
+        perHour <= 0
+    ) {
+
+        showError(
+            "入力値を確認してください。"
+        );
+
+        return;
+    }
+
+
+    // 残り経験値
+    const remainingExp =
+        required - current;
+
+
+    // すでに達成
+    if (remainingExp <= 0) {
+
+        resultTime.textContent =
+            "目標達成済み！";
+
+        remaining.textContent =
+            "残り経験値：0";
+
+        return;
+    }
+
+
+    // 必要時間
+    const hours =
+        remainingExp / perHour;
+
+
+    resultTime.textContent =
+        formatTime(hours);
+
+    remaining.textContent =
+        "残り経験値：" +
+        formatValue(remainingExp);
+}
+
+
+// ==============================
+// エラー表示
+// ==============================
+
+function showError(message) {
+
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+
+    resultTime.textContent = "-";
+    remaining.textContent = "残り経験値：-";
+}
+
+
+// ==============================
+// 入力時に自動計算
+// ==============================
+
+requiredInput.addEventListener(
+    "input",
+    calculate
+);
+
+currentInput.addEventListener(
+    "input",
+    calculate
+);
+
+perHourInput.addEventListener(
+    "input",
+    calculate
+);
+
+
+// ==============================
+// リセット
+// ==============================
+
+resetButton.addEventListener(
+    "click",
+    function() {
+
+        requiredInput.value = "";
+        currentInput.value = "";
+        perHourInput.value = "";
+
+        errorBox.style.display = "none";
+
+        resultTime.textContent = "-";
+        remaining.textContent = "残り経験値：-";
+    }
+);
+
+</script>
+
+</body>
+</html>
