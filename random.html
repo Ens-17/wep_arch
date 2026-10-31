@@ -1,0 +1,699 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名前ランダマイザー</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 24px 14px 40px;
+    background: #f3f5f8;
+    color: #252a34;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+.container {
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 25px;
+    margin: 8px 0 24px;
+}
+
+/* 人物タブ */
+.tabs {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding: 5px 2px 13px;
+    margin-bottom: 20px;
+    scrollbar-width: thin;
+}
+
+.tab {
+    flex: 0 0 auto;
+    min-width: 88px;
+    padding: 9px 10px;
+    border: 2px solid #e0e4eb;
+    border-radius: 12px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.15s;
+}
+
+.tab img {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 50%;
+    background: #e9edf2;
+}
+
+.tab.active {
+    border-color: #5287e8;
+    background: #edf4ff;
+    color: #2864c7;
+}
+
+.tab:hover {
+    border-color: #8aadeb;
+}
+
+.tab.free-tab {
+    min-width: 88px;
+    justify-content: center;
+}
+
+/* 名前表示 */
+.name-box {
+    background: white;
+    border: 1px solid #e2e6ed;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.name-label {
+    font-size: 12px;
+    color: #858c99;
+    margin-bottom: 9px;
+}
+
+.original-name {
+    font-size: 17px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+#customName {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    border: 1px solid #d5dae3;
+    border-radius: 9px;
+    font-size: 16px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* ボタン */
+.randomize-button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: #477fe0;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.randomize-button:hover {
+    background: #326bd0;
+}
+
+.randomize-button:active {
+    transform: scale(0.98);
+}
+
+/* 結果 */
+.result-section {
+    margin-top: 22px;
+}
+
+.section-label {
+    font-size: 13px;
+    color: #858c99;
+    margin-bottom: 9px;
+}
+
+.result-box {
+    min-height: 75px;
+    padding: 17px;
+    background: white;
+    border: 1px solid #e2e6ed;
+    border-radius: 12px;
+    font-size: 19px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+}
+
+.result-placeholder {
+    color: #aab0ba;
+    font-size: 14px;
+}
+
+/* 一致した文字 */
+.match {
+    color: #16a34a;
+    text-shadow:
+        0 0 5px rgba(34, 197, 94, 0.45),
+        0 0 12px rgba(34, 197, 94, 0.3);
+    font-weight: bold;
+}
+
+/* 一致率 */
+.rate-box {
+    margin-top: 12px;
+    padding: 15px;
+    background: white;
+    border: 1px solid #e2e6ed;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.rate-label {
+    color: #858c99;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.rate-value {
+    font-size: 27px;
+    font-weight: bold;
+    color: #333d4e;
+}
+
+/* 最高記録 */
+.best-section {
+    margin-top: 24px;
+}
+
+.best-box {
+    padding: 17px;
+    background: #fffdf4;
+    border: 1px solid #eee2b7;
+    border-radius: 12px;
+}
+
+.best-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #92711e;
+    margin-bottom: 12px;
+}
+
+.best-name {
+    font-size: 11px;
+    color: #969080;
+    margin-bottom: 6px;
+}
+
+.best-result {
+    font-size: 16px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+    margin-bottom: 10px;
+}
+
+.best-rate {
+    font-size: 22px;
+    font-weight: bold;
+    color: #a17a19;
+}
+
+.copy-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #d9dee7;
+    border-radius: 9px;
+    background: white;
+    color: #444;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background: #f5f7fa;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 18px 12px 30px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .result-box {
+        font-size: 17px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- 人物タブ -->
+    <div class="tabs" id="tabs"></div>
+
+    <!-- 元の名前 -->
+    <div class="name-box">
+        <div class="name-label" id="nameLabel">元の名前</div>
+        <div class="original-name" id="originalName"></div>
+        <textarea
+            id="customName"
+            placeholder="ここに入力..."
+            style="display:none;"
+        ></textarea>
+    </div>
+
+    <!-- ランダマイズボタン -->
+    <button class="randomize-button" onclick="randomize()">
+        あ、これトンカツですよトンカツ！！
+    </button>
+
+    <!-- 今回の結果 -->
+    <div class="result-section">
+        <div class="section-label">結果</div>
+
+        <div class="result-box" id="result">
+            <span class="result-placeholder">
+                ボタンを押すと結果が表示されます
+            </span>
+        </div>
+
+        <button class="copy-button" onclick="copyResult()">
+            結果をコピー
+        </button>
+
+        <!-- 今回の一致率 -->
+        <div class="rate-box">
+            <div class="rate-label">今回の一致率</div>
+            <div class="rate-value" id="currentRate">--%</div>
+        </div>
+    </div>
+
+    <!-- 最高記録 -->
+    <div class="best-section">
+        <div class="section-label">最高記録</div>
+
+        <div class="best-box">
+            <div class="best-title">これまでで最も元の名前に近かった結果</div>
+
+            <div class="best-name" id="bestName">
+                まだ記録がありません
+            </div>
+
+            <div class="best-result" id="bestResult">
+                ランダマイズして記録を作ろう！
+            </div>
+
+            <div class="best-rate" id="bestRate">--%</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* =====================================
+   人物データ
+   人物を追加するときはここに書き足す
+===================================== */
+
+const people = [
+    {
+        name: "アストローギスト・モナ・メギストス",
+        label: "モナ",
+        image: "images/mona.jpg"
+    },
+    {
+        name: "シュナペカぺ・サキト・ハトシェプスト",
+        label: "ぺぺ",
+        image: "images/pepe.jpg"
+    },
+    {
+        name: "神宵雷府総司駆雷掣電追魔払穢天君",
+        label: "神君",
+        image: "images/sinkun.jpg"
+    }
+];
+
+
+/* =====================================
+   基本設定
+===================================== */
+
+// 区切り記号
+const separators = new Set([
+    "・", "=", "-", ".", "/", "／",
+    "–", "—", ":", "：", "_"
+]);
+
+let selectedIndex = 0;
+let lastResult = "";
+
+// 最高記録
+let bestRecord = null;
+
+
+/* =====================================
+   タブ生成
+===================================== */
+
+function createTabs() {
+    const tabs = document.getElementById("tabs");
+    tabs.innerHTML = "";
+
+    people.forEach((person, index) => {
+        const button = document.createElement("button");
+        button.className = "tab";
+        button.onclick = () => selectPerson(index);
+
+        const img = document.createElement("img");
+        img.src = person.image;
+        img.alt = "";
+
+        // 画像がない場合は代替表示
+        img.onerror = function() {
+            this.style.display = "none";
+        };
+
+        const label = document.createElement("span");
+        label.textContent = person.label;
+
+        button.appendChild(img);
+        button.appendChild(label);
+
+        tabs.appendChild(button);
+    });
+
+    // 自由入力タブは最後
+    const freeButton = document.createElement("button");
+    freeButton.className = "tab free-tab";
+    freeButton.textContent = "自由入力";
+    freeButton.onclick = () => selectPerson(-1);
+
+    tabs.appendChild(freeButton);
+
+    updateTabStyle();
+}
+
+
+/* =====================================
+   人物選択
+===================================== */
+
+function selectPerson(index) {
+    selectedIndex = index;
+
+    const originalName = document.getElementById("originalName");
+    const customName = document.getElementById("customName");
+    const nameLabel = document.getElementById("nameLabel");
+
+    if (index === -1) {
+        // 自由入力
+        originalName.style.display = "none";
+        customName.style.display = "block";
+        nameLabel.textContent = "自由入力";
+    } else {
+        // 登録済み人物
+        originalName.style.display = "block";
+        customName.style.display = "none";
+        nameLabel.textContent = "元の名前";
+        originalName.textContent = people[index].name;
+    }
+
+    // 結果をリセット
+    document.getElementById("result").innerHTML =
+        '<span class="result-placeholder">ボタンを押すと結果が表示されます</span>';
+
+    document.getElementById("currentRate").textContent = "--%";
+    lastResult = "";
+
+    updateTabStyle();
+}
+
+
+/* =====================================
+   選択中タブの見た目
+===================================== */
+
+function updateTabStyle() {
+    const tabs = document.querySelectorAll(".tab");
+
+    tabs.forEach((tab, index) => {
+        const active =
+            (selectedIndex === -1 && index === people.length) ||
+            (selectedIndex === index);
+
+        tab.classList.toggle("active", active);
+    });
+}
+
+
+/* =====================================
+   元の名前を取得
+===================================== */
+
+function getOriginalName() {
+    if (selectedIndex === -1) {
+        return document.getElementById("customName").value;
+    }
+
+    return people[selectedIndex].name;
+}
+
+
+/* =====================================
+   区切り記号ごとに文字をシャッフル
+===================================== */
+
+function shuffleName(name) {
+    const chars = Array.from(name);
+    const result = [];
+
+    let segment = [];
+
+    function shuffleSegment() {
+        // Fisher-Yatesシャッフル
+        for (let i = segment.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [segment[i], segment[j]] =
+                [segment[j], segment[i]];
+        }
+
+        result.push(...segment);
+        segment = [];
+    }
+
+    chars.forEach(char => {
+        if (separators.has(char)) {
+            shuffleSegment();
+            result.push(char);
+        } else {
+            segment.push(char);
+        }
+    });
+
+    shuffleSegment();
+
+    return result.join("");
+}
+
+
+/* =====================================
+   一致率の計算
+   区切り記号は対象外
+===================================== */
+
+function calculateMatch(original, result) {
+    const originalChars = Array.from(original);
+    const resultChars = Array.from(result);
+
+    let total = 0;
+    let matched = 0;
+
+    const matchFlags = [];
+
+    for (let i = 0; i < originalChars.length; i++) {
+        const originalChar = originalChars[i];
+        const resultChar = resultChars[i];
+
+        // 区切り記号は比較対象外
+        if (separators.has(originalChar)) {
+            matchFlags.push(false);
+            continue;
+        }
+
+        total++;
+
+        if (originalChar === resultChar) {
+            matched++;
+            matchFlags.push(true);
+        } else {
+            matchFlags.push(false);
+        }
+    }
+
+    const rate = total === 0
+        ? 0
+        : (matched / total) * 100;
+
+    return {
+        matched,
+        total,
+        rate,
+        matchFlags
+    };
+}
+
+
+/* =====================================
+   結果を色付きで表示
+===================================== */
+
+function displayResult(result, matchFlags) {
+    const resultBox = document.getElementById("result");
+    const chars = Array.from(result);
+
+    resultBox.innerHTML = "";
+
+    chars.forEach((char, index) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+
+        if (matchFlags[index]) {
+            span.classList.add("match");
+        }
+
+        resultBox.appendChild(span);
+    });
+}
+
+
+/* =====================================
+   最高記録を更新・表示
+===================================== */
+
+function updateBestRecord(original, result, rate) {
+    if (!bestRecord || rate > bestRecord.rate) {
+        bestRecord = {
+            original,
+            result,
+            rate,
+            person: selectedIndex === -1
+                ? "自由入力"
+                : people[selectedIndex].label
+        };
+
+        displayBestRecord();
+    }
+}
+
+function displayBestRecord() {
+    if (!bestRecord) return;
+
+    document.getElementById("bestName").textContent =
+        "対象：" + bestRecord.person;
+
+    document.getElementById("bestResult").textContent =
+        bestRecord.result;
+
+    document.getElementById("bestRate").textContent =
+        bestRecord.rate.toFixed(1) + "%";
+}
+
+
+/* =====================================
+   ランダマイズ実行
+===================================== */
+
+function randomize() {
+    const original = getOriginalName();
+
+    if (!original.trim()) {
+        alert("名前を入力してください！");
+        return;
+    }
+
+    const result = shuffleName(original);
+
+    const match = calculateMatch(original, result);
+
+    lastResult = result;
+
+    // 結果表示
+    displayResult(result, match.matchFlags);
+
+    // 今回の一致率
+    document.getElementById("currentRate").textContent =
+        match.rate.toFixed(1) + "%";
+
+    // 最高記録の更新
+    updateBestRecord(original, result, match.rate);
+}
+
+
+/* =====================================
+   結果をコピー
+===================================== */
+
+async function copyResult() {
+    if (!lastResult) {
+        alert("先にランダマイズしてください！");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(lastResult);
+        alert("コピーしました！");
+    } catch (error) {
+        // clipboardが使えない環境向け
+        const textarea = document.createElement("textarea");
+        textarea.value = lastResult;
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            document.execCommand("copy");
+            alert("コピーしました！");
+        } catch (e) {
+            alert("コピーできませんでした。");
+        }
+
+        textarea.remove();
+    }
+}
+
+
+/* =====================================
+   初期化
+===================================== */
+
+createTabs();
+selectPerson(0);
+
+</script>
+
+</body>
+</html>
+
